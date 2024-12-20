@@ -10,16 +10,22 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # Step 2: Authenticate and set up Google Cloud SDK
+      # Step 2: Authenticate with Google Cloud
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Step 3: Set up gcloud CLI
-      - name: Set up Google Cloud CLI
-        run: gcloud config set project "devops-team-14-863342"
+      # Step 3: Install Google Cloud CLI
+      - name: Install Google Cloud CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-cloud-sdk
 
-      # Step 4: Deploy application
+      # Step 4: Set Active Project
+      - name: Set Active Project
+        run: gcloud config set project devops-team-14-863342
+
+      # Step 5: Deploy application
       - name: Deploy to Google Cloud
         run: gcloud app deploy --quiet
