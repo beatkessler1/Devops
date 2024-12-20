@@ -1,4 +1,4 @@
-name: Simple Google Cloud Deployment
+name: Simple Google Cloud Login
 
 on: push
 
@@ -10,14 +10,18 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # Step 2: Authenticate and set up Google Cloud SDK
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          project_id: "devops-team-14-863342" # Replace with your project ID
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
+      # Step 2: Install Google Cloud CLI
+      - name: Install Google Cloud CLI
+        run: |
+          echo "Installing Google Cloud SDK..."
+          sudo apt-get update && sudo apt-get install -y google-cloud-sdk
 
-      # Step 3: Deploy application
+      # Step 3: Authenticate Manually
+      - name: Authenticate with gcloud
+        run: gcloud auth login --no-launch-browser
+        env:
+          CLOUDSDK_CORE_PROJECT: devops-team-14-863342
+
+      # Step 4: Deploy to Google Cloud
       - name: Deploy to Google Cloud
         run: gcloud app deploy --quiet
