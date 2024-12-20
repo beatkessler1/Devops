@@ -1,0 +1,50 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-job:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Authenticate to Google Cloud
+      - name: Authenticate Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+
+      # Setup Google Cloud CLI
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      # Build the Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }} .
+
+      # Push the Docker image to Google Container Registry
+      - name: Push Docker image to Google Container Registry
+        run: |
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }}
+
+      # Deploy to Google Cloud Run
+      - name: Deploy to Google Cloud Run
+        run: |
+          gcloud run deploy my-app \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }} \
+            --region us-central1 \
+            --platform managed \
+            --allow-unauthenticated
