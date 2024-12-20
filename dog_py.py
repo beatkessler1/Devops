@@ -1632,4 +1632,4 @@ class RandomPlayer(Player):
 
 
 if __name__ == '__main__':
-    game = Dog()
+    game = Dog()    # change
